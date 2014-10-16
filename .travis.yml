@@ -6,4 +6,4 @@ python:
 install:
   - pip install -r requirements/test.txt
 # command to run tests
-script: python tests/functional_tests.py
+script: nosetests

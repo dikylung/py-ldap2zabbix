@@ -58,3 +58,6 @@ target/
 *~
 \#*#
 .#*
+
+# Sensitive data
+conf/*.yaml

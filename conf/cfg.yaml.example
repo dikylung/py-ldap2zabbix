@@ -1,0 +1,6 @@
+host: ldaphost
+user: uid=ldapuser,cn=sysaccounts,cn=etc
+password: ldappw
+domain: dc=example,dc=com
+group:  acme
+

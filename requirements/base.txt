@@ -1,0 +1,2 @@
+python3-ldap==0.9.5.4
+pyzabbix==0.7.1

@@ -56,3 +56,5 @@ target/
 
 # Editor temporary files
 *~
+\#*#
+.#*

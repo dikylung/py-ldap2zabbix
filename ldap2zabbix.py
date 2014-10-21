@@ -3,7 +3,8 @@
 import argparse
 import yaml
 from ldap3 import Server, Connection
-from pyzabbix import ZabbixAPI
+from pyzabbix import ZabbixAPI, ZabbixAPIException
+from requests.exceptions import MissingSchema
 
 class LDAPSearch(object):
     def __init__(self, host, port, domain, user, password):
@@ -27,6 +28,7 @@ class LDAPSearch(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("ldapcfg", help="the file storing LDAP connection info")
+    parser.add_argument("zabbixcfg", help="the file storing Zabbix connection info")
 
     args = parser.parse_args()
     ldapcfg = yaml.load(open(args.ldapcfg, 'r'))
@@ -35,4 +37,14 @@ if __name__ == '__main__':
                            ldapcfg['domain'],
                            ldapcfg['user'],
                            ldapcfg['password'])
+    zabbixcfg = yaml.load(open(args.zabbixcfg, 'r'))
+    try:
+        zh = ZabbixAPI(zabbixcfg['host'])
+        zh.login(zabbixcfg['user'], zabbixcfg['password'])
+    except MissingSchema as ms:
+        print("ERROR: Invalid Zabbix host URL")
+        exit(1)
+    except ZabbixAPIException as ze:
+        print("ERROR: Invalid Zabbix username or password")
+        exit(1)
     print(lsearcher.list_group(ldapcfg['group']))

@@ -6,6 +6,8 @@ from ldap3 import Server, Connection
 from pyzabbix import ZabbixAPI, ZabbixAPIException
 from requests.exceptions import MissingSchema
 
+LDAP_FILTER='(&(memberOf=cn=%s,cn=groups,cn=accounts,%s)(!(nsaccountlock=true)))'
+
 class LDAPSearch(object):
     def __init__(self, host, port, domain, user, password):
         self.host     = host
@@ -27,7 +29,7 @@ class LDAPSearch(object):
         return dn[start_index:end_index]
 
     def list_group(self, groupname):
-        return set(self.get_uid(res['dn']) for res in self.search('(&(memberOf=cn=%s,cn=groups,cn=accounts,%s)(!(nsaccountlock=true)))' % (groupname, self.domain)))
+        return set(self.get_uid(res['dn']) for res in self.search(LDAP_FILTER % (groupname, self.domain)))
 
     def search(self, search_filter):
         with Connection(Server(self.host, self.port),

@@ -16,8 +16,18 @@ class LDAPSearch(object):
 
         self.search_base = 'cn=users,cn=accounts,%s' % (domain,)
 
+    @staticmethod
+    def get_uid(dn):
+        """
+        :type dn: string
+        :return: string
+        """
+        start_index = dn.find("uid=") + 4
+        end_index = dn.find(",cn=")
+        return dn[start_index:end_index]
+
     def list_group(self, groupname):
-        return self.search('(memberOf=cn=%s,cn=groups,cn=accounts,%s)' % (groupname, self.domain))
+        return set(self.get_uid(res['dn']) for res in self.search('(&(memberOf=cn=%s,cn=groups,cn=accounts,%s)(!(nsaccountlock=true)))' % (groupname, self.domain)))
 
     def search(self, search_filter):
         with Connection(Server(self.host, self.port),
@@ -47,4 +57,10 @@ if __name__ == '__main__':
     except ZabbixAPIException as ze:
         print("ERROR: Invalid Zabbix username or password")
         exit(1)
-    print(lsearcher.list_group(ldapcfg['group']))
+    ldap_users = lsearcher.list_group(ldapcfg['group'])
+    zabbix_users = set(u['alias'] for u in zh.user.get(output=["alias"]))
+    print("LDAP users:   %s" % (ldap_users,))
+    print("Zabbix users: %s" % (zabbix_users,))
+    print ("To be added: %s" % ldap_users.difference(zabbix_users))
+
+
